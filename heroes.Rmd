@@ -1,0 +1,106 @@
+---
+title: "heroes"
+author: "Renata"
+date: "26 de setembro de 2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+### Q1
+
+```{r}
+library(tidyverse)
+library(forcats)
+hero_powers <- read_csv("super_hero_powers.csv", na = c("","-","NA"))
+hero_info <- read_csv("heroes_information.csv", na = c("","-","NA"))
+glimpse(hero_powers)
+glimpse(hero_info)
+```
+
+### Q2
+
+```{r}
+hero_powers <- janitor::clean_names(hero_powers)
+hero_info <- janitor::clean_names(hero_info)
+```
+
+### Q3
+
+```{r}
+hero_info <- select(hero_info,-x1)
+```
+
+### Q4
+
+```{r}
+mutate_all(select(hero_powers,-hero_names),as.logical)
+hero_powers <- cbind(select(hero_powers,hero_names),mutate_all(select(hero_powers,-hero_names),as.logical))
+```
+
+### Q5
+
+```{r}
+hero_info %>% count(publisher)
+hero_info2 <- hero_info %>%
+  mutate(publisher_new = case_when(publisher == "Marvel Comics" ~ "Marvel",
+                               publisher == "DC Comics" ~ "DC",
+                               publisher != c("Marvel Comics","DC Comics") ~ "Outros"
+    
+  ))
+hero_info2 %>% count(publisher_new)
+```
+
+### Q6
+
+```{r}
+race <- hero_info %>% group_by(race) %>% filter(publisher == "DC Comics") %>% count(race)
+```
+### Q7
+
+```{r}
+hero_info %>% group_by(gender) %>% count(eye_color, sort = T) %>% na.omit()
+```
+
+### Q8
+
+```{r}
+hero_powers %>% select(-hero_names) %>% summarise_all(mean)
+hero_powers %>% summarise_if(is.logical, mean)                       
+```
+
+### Q9
+
+```{r}
+hero_poder <- hero_powers %>% gather(poder, possui_poder, -hero_names)
+media_hero_poder <- hero_poder %>% group_by(poder) %>% summarize(media = mean(possui_poder), frequencia=n())
+```
+
+### Q10
+
+```{r}
+hero <- inner_join(hero_info,hero_powers, by = c("name"="hero_names"))
+```
+
+### Q11
+
+```{r}
+media_hero_telepata <- hero %>% group_by(publisher) %>% summarize(media = mean(telepathy))
+```
+
+### Q12
+
+```{r}
+hero %>% select(name, publisher, flight, weight) %>%  filter(flight == TRUE) %>% 
+            top_n(weight, n = 10)
+```
+
+# Q13
+
+```{r}
+write_csv(x = hero, path = "herois_completo.csv")
+```
+
+
+
+
